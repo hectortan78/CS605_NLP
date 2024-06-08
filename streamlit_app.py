@@ -75,7 +75,7 @@ class PrintRetrievalHandler(BaseCallbackHandler):
         self.status.update(state="complete")
 
 
-openai_api_key = st.sidebar.text_input("sk-proj-adW98bPkgmgD6Xa35YlWT3BlbkFJX0hVBaoHBC6ldTNCp01U", type="password")
+openai_api_key = st.sidebar.text_input("Open AI key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.")
     st.stop()
