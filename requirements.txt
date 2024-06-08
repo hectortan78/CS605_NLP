@@ -6,3 +6,4 @@ langchain_community
 PyPDF2
 docarray
 transformers
+pypdf
