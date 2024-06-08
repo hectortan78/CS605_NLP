@@ -5,4 +5,3 @@ langchain
 PyPDF2
 docarray
 transformers
-tempfile
