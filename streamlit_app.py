@@ -98,12 +98,17 @@ msgs = StreamlitChatMessageHistory()
 memory = ConversationBufferMemory(memory_key="chat_history", chat_memory=msgs, return_messages=True)
 
 # Setup LLM and QA chain
-llm = ChatOpenAI(
-    model_name="gpt-3.5-turbo", openai_api_key=openai_api_key, temperature=0, streaming=True
-)
-qa_chain = ConversationalRetrievalChain.from_llm(
-    llm, retriever=retriever, memory=memory, verbose=True
-)
+try:
+    llm = ChatOpenAI(
+        model_name="gpt-3.5-turbo", openai_api_key=openai_api_key, temperature=0, streaming=True
+    )
+    qa_chain = ConversationalRetrievalChain.from_llm(
+        llm, retriever=retriever, memory=memory, verbose=True
+    )
+except ImportError as e:
+    st.error(f"ImportError: {e}")
+except Exception as e:
+    st.error(f"An error occurred: {e}")
 
 if len(msgs.messages) == 0 or st.sidebar.button("Clear message history"):
     msgs.clear()
