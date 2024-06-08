@@ -14,7 +14,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 st.set_page_config(page_title="CPF Chat Bot Assistant", page_icon="🦜")
 st.title("🦜 CPF Chat Bot Assistant")
 
-
 @st.cache_resource(ttl="1h")
 def configure_retriever(uploaded_files):
     try:
@@ -42,9 +41,10 @@ def configure_retriever(uploaded_files):
         return retriever
     except ImportError as e:
         st.error(f"ImportError: {e}")
+        return None
     except Exception as e:
         st.error(f"An error occurred: {e}")
-
+        return None
 
 class StreamHandler(BaseCallbackHandler):
     def __init__(self, container: st.delta_generator.DeltaGenerator, initial_text: str = ""):
@@ -62,7 +62,6 @@ class StreamHandler(BaseCallbackHandler):
         self.text += token
         self.container.markdown(self.text)
 
-
 class PrintRetrievalHandler(BaseCallbackHandler):
     def __init__(self, container):
         self.status = container.status("**Context Retrieval**")
@@ -78,7 +77,6 @@ class PrintRetrievalHandler(BaseCallbackHandler):
             self.status.markdown(doc.page_content)
         self.status.update(state="complete")
 
-
 openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.")
@@ -92,6 +90,9 @@ if not uploaded_files:
     st.stop()
 
 retriever = configure_retriever(uploaded_files)
+if retriever is None:
+    st.error("Failed to configure retriever. Please check the error messages above.")
+    st.stop()
 
 # Setup memory for contextual conversation
 msgs = StreamlitChatMessageHistory()
@@ -107,8 +108,10 @@ try:
     )
 except ImportError as e:
     st.error(f"ImportError: {e}")
+    st.stop()
 except Exception as e:
     st.error(f"An error occurred: {e}")
+    st.stop()
 
 if len(msgs.messages) == 0 or st.sidebar.button("Clear message history"):
     msgs.clear()
