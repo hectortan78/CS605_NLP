@@ -11,7 +11,7 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains import ConversationalRetrievalChain
 from langchain.vectorstores import DocArrayInMemorySearch
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from openai.error import RateLimitError  # Ensure this import works
+import openai
 
 st.set_page_config(page_title="LangChain: Chat with Documents", page_icon="🦜")
 st.title("🦜 LangChain: Chat with Documents")
@@ -83,10 +83,13 @@ def call_with_retry(func, *args, max_retries=5, **kwargs):
     for attempt in range(max_retries):
         try:
             return func(*args, **kwargs)
-        except RateLimitError as e:
+        except openai.error.RateLimitError as e:
             wait_time = 2 ** attempt  # Exponential backoff
             st.warning(f"Rate limit exceeded. Retrying in {wait_time} seconds...")
             time.sleep(wait_time)
+        except openai.error.OpenAIError as e:  # Catch any OpenAI API errors
+            st.error(f"OpenAI API Error: {e}")
+            return None
     st.error("Max retries exceeded. Please try again later.")
     return None
 
