@@ -1,3 +1,8 @@
 streamlit
 pymupdf
 Pillow
+langchain
+PyPDF2
+docarray
+transformers
+tempfile
