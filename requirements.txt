@@ -1,9 +1,9 @@
 streamlit
-pymupdf
+# pymupdf
 Pillow
 langchain
 langchain_community
-# PyPDF2
+PyPDF2
 docarray
 transformers
 pypdf
