@@ -8,3 +8,4 @@ docarray
 transformers
 pypdf
 openai
+sentence-transformers
