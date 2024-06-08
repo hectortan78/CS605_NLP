@@ -1,6 +1,7 @@
 import os
 import tempfile
 import streamlit as st
+import time
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import PyPDFLoader
 from langchain.memory import ConversationBufferMemory
@@ -10,6 +11,7 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains import ConversationalRetrievalChain
 from langchain.vectorstores import DocArrayInMemorySearch
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from openai.error import RateLimitError
 
 st.set_page_config(page_title="CPF Chat Bot Assistant", page_icon="🦜")
 st.title("🦜 CPF Chat Bot Assistant")
@@ -77,6 +79,17 @@ class PrintRetrievalHandler(BaseCallbackHandler):
             self.status.markdown(doc.page_content)
         self.status.update(state="complete")
 
+def call_with_retry(func, *args, max_retries=5, **kwargs):
+    for attempt in range(max_retries):
+        try:
+            return func(*args, **kwargs)
+        except RateLimitError as e:
+            wait_time = 2 ** attempt  # Exponential backoff
+            st.warning(f"Rate limit exceeded. Retrying in {wait_time} seconds...")
+            time.sleep(wait_time)
+    st.error("Max retries exceeded. Please try again later.")
+    return None
+
 openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.")
@@ -127,4 +140,5 @@ if user_query := st.chat_input(placeholder="Ask me anything!"):
     with st.chat_message("assistant"):
         retrieval_handler = PrintRetrievalHandler(st.container())
         stream_handler = StreamHandler(st.empty())
-        response = qa_chain.run(user_query, callbacks=[retrieval_handler, stream_handler])
+        response = call_with_retry(qa_chain.run, user_query, callbacks=[retrieval_handler, stream_handler])
+
