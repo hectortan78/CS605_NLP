@@ -89,10 +89,10 @@ class PrintRetrievalHandler(BaseCallbackHandler):
 #     st.info("Please upload PDF documents to continue.")
 #     st.stop()
 
-retriever = configure_retriever(uploaded_files)
-if retriever is None:
-    st.error("Failed to configure retriever. Please check the error messages above.")
-    st.stop()
+# retriever = configure_retriever(uploaded_files)
+# if retriever is None:
+#     st.error("Failed to configure retriever. Please check the error messages above.")
+#     st.stop()
 
 # Setup memory for contextual conversation
 msgs = StreamlitChatMessageHistory()
