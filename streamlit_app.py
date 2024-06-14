@@ -77,17 +77,17 @@ class PrintRetrievalHandler(BaseCallbackHandler):
             self.status.markdown(doc.page_content)
         self.status.update(state="complete")
 
-openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.")
-    st.stop()
+# openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")
+# if not openai_api_key:
+#     st.info("Please add your OpenAI API key to continue.")
+#     st.stop()
 
-uploaded_files = st.sidebar.file_uploader(
-    label="Upload PDF files", type=["pdf"], accept_multiple_files=True
-)
-if not uploaded_files:
-    st.info("Please upload PDF documents to continue.")
-    st.stop()
+# uploaded_files = st.sidebar.file_uploader(
+#     label="Upload PDF files", type=["pdf"], accept_multiple_files=True
+# )
+# if not uploaded_files:
+#     st.info("Please upload PDF documents to continue.")
+#     st.stop()
 
 retriever = configure_retriever(uploaded_files)
 if retriever is None:
@@ -101,7 +101,7 @@ memory = ConversationBufferMemory(memory_key="chat_history", chat_memory=msgs, r
 # Setup LLM and QA chain
 try:
     llm = ChatOpenAI(
-        model_name="gpt-3.5-turbo", openai_api_key=openai_api_key, temperature=0, streaming=True
+        model_name="gpt-3.5-turbo", openai_api_key=st.secrets["OPEN_AI_KEY"], temperature=0, streaming=True
     )
     qa_chain = ConversationalRetrievalChain.from_llm(
         llm, retriever=retriever, memory=memory, verbose=True
