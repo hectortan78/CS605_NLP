@@ -42,9 +42,9 @@ def retriever():
         vectordb = Chroma(persist_directory="./openai_chroma_db",embedding_function=embeddings)
 
         # Define retriever
-        # retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 2, "fetch_k": 4})
+        retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 2, "fetch_k": 4})
         # retriever = vectordb.as_retriever(k = 4)
-        retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 4})
+        # retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 4})
         
         return retriever
     
@@ -113,7 +113,7 @@ try:
         model_name="gpt-3.5-turbo", openai_api_key=st.secrets["OPEN_AI_KEY"], temperature=0, streaming=True
     )
     qa_chain = ConversationalRetrievalChain.from_llm(
-        llm, retriever=retriever, memory=memory, verbose=True,
+        llm, retriever=retriever(), memory=memory, verbose=True,
         chain_type = "stuff"
     )
 except ImportError as e:
