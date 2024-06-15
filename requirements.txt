@@ -1,11 +1,11 @@
-streamlit
+streamlit==1.35.0
+Pillow==10.2.0
+langchain==0.1.13
+langchain_community==0.0.29
+openai==1.14.2
+transformers==4.32.1
 # pymupdf
-Pillow
-langchain
-langchain_community
-PyPDF2
-docarray
-transformers
-pypdf
-openai
-sentence-transformers
+# PyPDF2
+# docarray
+# pypdf
+# sentence-transformers
