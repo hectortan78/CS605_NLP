@@ -10,35 +10,44 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains import ConversationalRetrievalChain
 from langchain.vectorstores import DocArrayInMemorySearch
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_chroma import Chroma
+from langchain_openai import OpenAIEmbeddings
 
 st.set_page_config(page_title="CPF Chat Bot Assistant", page_icon="🗝️")
 st.title("📗🗝️ CPF Chat Bot Assistant")
 
 @st.cache_resource(ttl="1h")
-def configure_retriever(uploaded_files):
+def retriever():
     try:
-        # Read documents
-        docs = []
-        temp_dir = tempfile.TemporaryDirectory()
-        for file in uploaded_files:
-            temp_filepath = os.path.join(temp_dir.name, file.name)
-            with open(temp_filepath, "wb") as f:
-                f.write(file.getvalue())
-            loader = PyPDFLoader(temp_filepath)
-            docs.extend(loader.load())
+        # # Read documents
+        # docs = []
+        # temp_dir = tempfile.TemporaryDirectory()
+        # for file in uploaded_files:
+        #     temp_filepath = os.path.join(temp_dir.name, file.name)
+        #     with open(temp_filepath, "wb") as f:
+        #         f.write(file.getvalue())
+        #     loader = PyPDFLoader(temp_filepath)
+        #     docs.extend(loader.load())
 
         # Split documents
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)
-        splits = text_splitter.split_documents(docs)
+        # text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)
+        # splits = text_splitter.split_documents(docs)
 
         # Create embeddings and store in vectordb
-        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        vectordb = DocArrayInMemorySearch.from_documents(splits, embeddings)
+        # embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        # vectordb = DocArrayInMemorySearch.from_documents(splits, embeddings)
+
+        os.environ["OPENAI_API_KEY"] = st.secrets["OPEN_AI_KEY"]
+        embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+        vectordb = Chroma(persist_directory="./openai_chroma_db",embedding_function=embeddings)
 
         # Define retriever
-        retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 2, "fetch_k": 4})
-
+        # retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 2, "fetch_k": 4})
+        # retriever = vectordb.as_retriever(k = 4)
+        retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 4})
+        
         return retriever
+    
     except ImportError as e:
         st.error(f"ImportError: {e}")
         return None
@@ -104,7 +113,8 @@ try:
         model_name="gpt-3.5-turbo", openai_api_key=st.secrets["OPEN_AI_KEY"], temperature=0, streaming=True
     )
     qa_chain = ConversationalRetrievalChain.from_llm(
-        llm, retriever=retriever, memory=memory, verbose=True
+        llm, retriever=retriever, memory=memory, verbose=True,
+        chain_type = "stuff"
     )
 except ImportError as e:
     st.error(f"ImportError: {e}")
