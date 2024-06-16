@@ -12,6 +12,8 @@ from langchain.vectorstores import DocArrayInMemorySearch
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_openai import OpenAIEmbeddings
+from langchain.prompts import HumanMessagePromptTemplate, SystemMessagePromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
 st.set_page_config(page_title="CPF Chat Bot Assistant", page_icon="🗝️")
 st.title("📗🗝️ CPF Chat Bot Assistant")
@@ -107,14 +109,35 @@ class PrintRetrievalHandler(BaseCallbackHandler):
 msgs = StreamlitChatMessageHistory()
 memory = ConversationBufferMemory(memory_key="chat_history", chat_memory=msgs, return_messages=True)
 
+# Setup prompt engineering template
+system_prompt_template = r"""
+i. Assume the location is Singapore unless otherwise specified.
+ii. First, refer to the document Central Provident Fund Act 1953 to reply user but if the 
+answer is not found there, use your general knowledge about Singapore's central provident 
+fund (CPF). 
+iii. If the user writes to you in Mandarin, reply in simplified Mandarin.
+iv. Be compassionate speak like you are talking to a friend. Provide the right hotline/external website hyperlink where necessary.
+
+--------------
+{context}
+--------------
+"""
+user_template = "Question:```{question}```"
+messages = [
+    SystemMessagePromptTemplate.from_template(system_prompt_template),
+    HumanMessagePromptTemplate.from_template(user_template)
+]
+
 # Setup LLM and QA chain
 try:
     llm = ChatOpenAI(
         model_name="gpt-3.5-turbo", openai_api_key=st.secrets["OPEN_AI_KEY"], temperature=0, streaming=True
     )
+    qa_prompt = ChatPromptTemplate.from_messages(messages)
     qa_chain = ConversationalRetrievalChain.from_llm(
         llm, retriever=retriever(), memory=memory, verbose=True,
-        chain_type = "stuff"
+        chain_type = "stuff",
+        combine_docs_chain_kwargs={'prompt': qa_prompt}
     )
 except ImportError as e:
     st.error(f"ImportError: {e}")
@@ -125,7 +148,7 @@ except Exception as e:
 
 if len(msgs.messages) == 0 or st.sidebar.button("Clear message history"):
     msgs.clear()
-    msgs.add_ai_message("How can I help you?")
+    msgs.add_ai_message("Hello! I am a RAG-enabled Central Provident Fund (CPF) chatbot. Ask away!")
 
 avatars = {"human": "user", "ai": "assistant"}
 for msg in msgs.messages:
