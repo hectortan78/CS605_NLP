@@ -44,7 +44,7 @@ def retriever():
         vectordb = Chroma(persist_directory="./openai_chroma_db",embedding_function=embeddings)
 
         # Define retriever
-        retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 2, "fetch_k": 4})
+        retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 5, "fetch_k": 10})
         # retriever = vectordb.as_retriever(k = 4)
         # retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 4})
         
@@ -116,7 +116,8 @@ ii. First, refer to the document Central Provident Fund Act 1953 to reply user b
 answer is not found there, use your general knowledge about Singapore's central provident 
 fund (CPF). 
 iii. If the user writes to you in Mandarin, reply in simplified Mandarin.
-iv. Be compassionate speak like you are talking to a friend. Provide the right hotline/external website hyperlink where necessary.
+iv. Be compassionate speak like you are talking to a friend. 
+Provide the right hotline/external website hyperlink where necessary.
 
 --------------
 {context}
