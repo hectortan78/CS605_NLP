@@ -44,7 +44,7 @@ def retriever():
         vectordb = Chroma(persist_directory="./openai_chroma_db",embedding_function=embeddings)
 
         # Define retriever
-        retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 5, "fetch_k": 10})
+        retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 3, "fetch_k": 5})
         # retriever = vectordb.as_retriever(k = 4)
         # retriever = vectordb.as_retriever(search_type="mmr", search_kwargs={"k": 4})
         
