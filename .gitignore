@@ -1,2 +1,3 @@
 context/*
 .streamlit/secrets.toml
+openai_chroma_db/4ab08eb8-89b9-45af-91fd-15b9278ffadc/length.bin
